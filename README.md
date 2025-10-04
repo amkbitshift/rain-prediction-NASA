@@ -60,3 +60,4 @@ Other Resources:
 HTML, CSS, JavaScript: https://developer.mozilla.org/
 
 W3C Geolocation API: https://www.w3.org/TR/geolocation-API/
+Updated README.
