@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Will It Rain On My Parade?</title>
+    <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #839abd 0%, #6789cc 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(72, 87, 117, 0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .cloud-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        h1 {
+            color: #485775;
+            font-size: 2.2rem;
+            margin-bottom: 30px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .date-section {
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            color: #485775;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        input[type="date"] {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #cbd2c0;
+            border-radius: 12px;
+            font-size: 1rem;
+            color: #485775;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        input[type="date"]:focus {
+            outline: none;
+            border-color: #6789cc;
+            box-shadow: 0 0 0 3px rgba(103, 137, 204, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .probability-display {
+            background: linear-gradient(135deg, #cbd2c0, #e8ede8);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 24px 0;
+            border: 2px solid #cbd2c0;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+
+        .probability-text {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #485775;
+            margin-bottom: 8px;
+        }
+
+        .probability-subtitle {
+            font-size: 1rem;
+            color: #6789cc;
+            font-weight: 500;
+        }
+
+        .rain-animation {
+            font-size: 2rem;
+            margin-bottom: 12px;
+            animation: bounce 1s ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 60%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            80% { transform: translateY(-5px); }
+        }
+
+        .check-another-btn {
+            background: linear-gradient(135deg, #6789cc, #839abd);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(103, 137, 204, 0.3);
+            margin-top: 20px;
+        }
+
+        .check-another-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(103, 137, 204, 0.4);
+        }
+
+        .check-another-btn:active {
+            transform: translateY(0);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .probability-text {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="cloud-icon">☁️</div>
+        <h1>Will It Rain On My Parade?</h1>
+        
+        <div class="date-section">
+            <label for="dateInput">Select a date:</label>
+            <input type="date" id="dateInput">
+        </div>
+
+        <button class="check-another-btn" id="checkButton">
+            Check Probability
+        </button>
+        
+        <div id="probabilitySection" class="hidden">
+            <div class="probability-display fade-in">
+                <div class="rain-animation" id="rainIcon"></div>
+                <div class="probability-text" id="probabilityText"></div>
+                <div class="probability-subtitle" id="subtitle"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Get DOM elements
+        const dateInput = document.getElementById('dateInput');
+        const checkButton = document.getElementById('checkButton');
+        const probabilitySection = document.getElementById('probabilitySection');
+        const probabilityText = document.getElementById('probabilityText');
+        const rainIcon = document.getElementById('rainIcon');
+        const subtitle = document.getElementById('subtitle');
+
+        // NASA POWER API Endpoint
+        const API_BASE_URL = "https://power.larc.nasa.gov/api/temporal/daily/point";
+        const API_KEY = "DEMO_KEY"; // Use the public demo key for the challenge
+
+        // Add an event listener to the button
+        checkButton.addEventListener('click', () => {
+            // Basic validation
+            if (!dateInput.value) {
+                alert("Please select a date.");
+                return;
+            }
+
+            // Show a loading state while fetching data
+            showLoadingState();
+
+            // Use Geolocation API to get the user's current coordinates
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    const selectedDate = new Date(dateInput.value);
+                    const month = selectedDate.getMonth() + 1; // getMonth() is 0-indexed
+                    const day = selectedDate.getDate();
+
+                    // Define the parameters for the NASA API request
+                    const params = new URLSearchParams({
+                        parameters: 'PRECTOTCORR',
+                        community: 'AG',
+                        longitude: lon,
+                        latitude: lat,
+                        start: '19850101', // Starting from 1985 for good historical data
+                        end: new Date().toISOString().split('T')[0].replace(/-/g, ''),
+                        format: 'JSON',
+                        api_key: API_KEY
+                    });
+                    
+                    // Call the NASA API directly
+                    fetch(`${API_BASE_URL}?${params.toString()}`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            // Process the data to calculate the probability
+                            const allPrecipitationData = data.properties.parameter.PRECTOTCORR;
+                            let rainyDays = 0;
+                            let totalDays = 0;
+
+                            for (const date in allPrecipitationData) {
+                                const currentDate = new Date(date.substring(0, 4), date.substring(4, 6) - 1, date.substring(6, 8));
+                                // Check if the day and month match the selected date
+                                if (currentDate.getMonth() + 1 === month && currentDate.getDate() === day) {
+                                    totalDays++;
+                                    // Consider a day "rainy" if precipitation is above a small threshold
+                                    if (allPrecipitationData[date] > 0.1) {
+                                        rainyDays++;
+                                    }
+                                }
+                            }
+
+                            // Calculate the probability
+                            const probability = totalDays > 0 ? (rainyDays / totalDays) * 100 : 0;
+                            
+                            // Update the UI with the result
+                            hideLoadingState();
+                            updateProbabilityDisplay(probability);
+                        })
+                        .catch(error => {
+                            console.error("Error fetching data:", error);
+                            hideLoadingState();
+                            showErrorState();
+                        });
+
+                }, () => {
+                    // Geolocation was denied or failed
+                    hideLoadingState();
+                    showErrorState("Geolocation failed. Please allow location access.");
+                });
+            } else {
+                // Geolocation is not supported
+                hideLoadingState();
+                showErrorState("Geolocation is not supported by your browser.");
+            }
+        });
+
+        // Function to update the UI with probability data
+        function updateProbabilityDisplay(probability) {
+            let icon = '☀️';
+            if (probability > 70) {
+                icon = '🌧️';
+            } else if (probability > 40) {
+                icon = '⛅';
+            } else if (probability > 20) {
+                icon = '🌤️';
+            }
+            
+            rainIcon.textContent = icon;
+            probabilityText.textContent = `${probability.toFixed(0)}%`;
+            subtitle.textContent = "chance of rain based on NASA data";
+            
+            probabilitySection.classList.remove('hidden');
+            probabilitySection.classList.add('fade-in');
+        }
+
+        // Function to show a loading state
+        function showLoadingState() {
+            probabilitySection.classList.remove('hidden', 'fade-in');
+            probabilityText.textContent = "Fetching data...";
+            rainIcon.textContent = "⚙️";
+            subtitle.textContent = "Please wait...";
+        }
+
+        // Function to hide the loading state
+        function hideLoadingState() {
+            probabilityText.textContent = "";
+            rainIcon.textContent = "";
+            subtitle.textContent = "";
+        }
+
+        // Function to show an error message
+        function showErrorState(message = "An error occurred. Please try again.") {
+            probabilitySection.classList.remove('hidden', 'fade-in');
+            probabilityText.textContent = "Error";
+            rainIcon.textContent = "❌";
+            subtitle.textContent = message;
+        }
+    </script>
+</body>
+</html>
