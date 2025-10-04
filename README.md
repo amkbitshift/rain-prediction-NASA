@@ -9,7 +9,7 @@ Team
 Team Project Raincheck
 
 Live Demo
-Click here to see the live app!
+[Click here to see project](https://amkbitshift.github.io/rain-prediction-NASA/)
 
 Project Overview
 Planning a future outdoor event can be challenging when weather forecasts are unreliable more than a few days out. Our project, "Project Raincheck," provides a unique solution by giving users a data-driven, long-range weather probability. Our web application uses decades of historical NASA Earth observation data to answer the question, "What is the historical chance of rain on my specific date and at my location?"
@@ -60,4 +60,3 @@ Other Resources:
 HTML, CSS, JavaScript: https://developer.mozilla.org/
 
 W3C Geolocation API: https://www.w3.org/TR/geolocation-API/
-Updated README.
